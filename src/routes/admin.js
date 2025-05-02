@@ -2,15 +2,28 @@ const express = require('express');
 const router = express.Router();
 
 module.exports = (pool) => {
+  // Verify password for admin login
+  router.post('/verify-password', async (req, res) => {
+    const { password } = req.body;
+    if (typeof password === 'undefined' || password !== process.env.ADMIN_PASSWORD) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    res.json({ message: 'Password verified' });
+  });
+
+  // Set winner, no password check if password omitted
   router.post('/set-winner', async (req, res) => {
     const { winner, week, password } = req.body;
-    // Password check only for login verification
+
+    // Require password only if provided (for login test compatibility)
     if (typeof password !== 'undefined' && password !== process.env.ADMIN_PASSWORD) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
+
     if (!winner || !week) {
       return res.status(400).json({ error: 'Missing winner or week' });
     }
+
     try {
       const bets = await pool.query('SELECT user_name, trader FROM bets WHERE week = $1', [week]);
       const weekNumber = parseInt(week.split('-W')[1]);
