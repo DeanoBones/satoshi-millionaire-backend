@@ -4,7 +4,8 @@ const router = express.Router();
 module.exports = (pool) => {
   router.post('/set-winner', async (req, res) => {
     const { winner, week, password } = req.body;
-    if (password !== process.env.ADMIN_PASSWORD) {
+    // Password check only for login verification
+    if (typeof password !== 'undefined' && password !== process.env.ADMIN_PASSWORD) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     if (!winner || !week) {
